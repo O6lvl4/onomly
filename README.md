@@ -1,63 +1,69 @@
-# name-check
+<h1 align="center">onomly</h1>
 
-プロダクト/プロジェクト名候補の**デューデリジェンス調査**をする [Claude Code](https://claude.com/claude-code) スキル。名前を渡すと、パッケージレジストリ・ドメイン・GitHub の空き、既存プロダクト・商標の衝突、多言語での意味、検索性/LLM 識別性を定型手順で調べ、**判定付きレポート**を返す。
+<p align="center"><em>名前を、出す前に検分する。</em></p>
 
+<p align="center">
+プロダクト/プロジェクト名候補の<strong>デューデリジェンス調査</strong>をする
+<a href="https://claude.com/claude-code">Claude Code</a> スキル。<br>
+レジストリ・ドメイン・GitHub の空き、既存プロダクト・商標の衝突、多言語での意味、
+検索性/LLM 識別性を定型で調べ、<strong>判定付きレポート</strong>を返す。
+</p>
+
+---
+
+> [!NOTE]
+> **`onomly` という名前自体、このツールで選んだ。** ギリシャ語 *onoma*(名前) → *onomastics*(名前学) から。
+> 自分自身の検査をほぼ完全に通過している ↓
+
+```text
+$ onomly onomly
+=== onomly ===
+npm ✅  crates.io ✅  RubyGems ✅  Homebrew ✅  GitHub ✅
+.com ✅  .ai ✅  .io ✅  .dev ✅  .org ✅
+PyPI だけ taken
+→ 推奨: 全レジストリ・全ドメインでクリア
 ```
-/name-check Heartwood
-```
 
-```
-結論: 🟡 要注意 — 一般名詞で主要な取得先が総取られ
-┌───────────┬─────────────┐
-│ GitHub    │ ❌ taken     │
-│ npm       │ ❌ taken     │
-│ crates.io │ ❌ taken     │
-│ PyPI      │ ✅ 空き       │
-│ .com/.ai… │ ❌ 全部登録済 │
-└───────────┴─────────────┘
-既存プロダクト: AWS Lambda 監視ツール heartwood ほか多数 …
-```
+## Install
 
-## インストール
-
-スキルディレクトリに clone するだけ:
+スキルディレクトリに clone するだけ。
 
 ```sh
-git clone https://github.com/O6lvl4/name-check ~/.claude/skills/name-check
+git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 ```
 
-Claude Code を再起動すると `/name-check` が使えるようになる。
+Claude Code を再起動すると `/onomly` が使える。
 
-## 使い方
+## Usage
 
 ```sh
-/name-check <名前>              # 1 個
-/name-check Foo Bar Baz         # 複数まとめて (最後に比較表)
+/onomly Heartwood            # 1 個
+/onomly Foo Bar Baz          # 複数まとめて (最後に比較表)
 ```
 
-引数なしで呼ぶと候補名を聞き返す。
+引数なしなら候補名を聞き返す。
 
-## 何を調べるか
+## What it checks
 
-1. **機械チェック** (`check.sh`) — npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン (`.com .ai .io .dev .org`、RDAP→whois フォールバック)。`AVAILABLE` / `taken` / `registered` で判定
-2. **既存プロダクト・商標** — 英語・日本語で Web 検索し、同名プロダクト、一般名詞化、有名 CS 用語との衝突を拾う
-3. **多言語・文化** — 主要言語 (英西仏独中日) でのネガティブな意味・スラング、発音のしやすさ、綴りの一意性
-4. **検索性・LLM 識別性** — 検索結果を独占できるか、AI が別プロダクトと混同しないか、商標としての識別力
+| # | 観点 | 中身 |
+|---|------|------|
+| 1 | **機械チェック** (`check.sh`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / ドメイン(`.com .ai .io .dev .org`、RDAP→whois フォールバック) |
+| 2 | **既存プロダクト・商標** | 英日で Web 検索。同名プロダクト、一般名詞化、有名 CS 用語との衝突 |
+| 3 | **多言語・文化** | 英西仏独中日でのネガティブな意味・スラング、発音・綴りの一意性 |
+| 4 | **検索性・LLM 識別性** | 検索独占の見込み、AI が別物と混同しないか、商標の識別力 |
 
-## レポート形式
+各候補は「**結論(推奨 / 要注意 / 避けるべき)**」を先頭に、取得可能性の表・衝突リスト(リンク付き)・商標所見・検索性評価。複数なら比較表と推奨順位付き。
 
-候補ごとに「**結論 (推奨 / 要注意 / 避けるべき)**」を先頭に、取得可能性の表、既存プロダクトの衝突（リンク付き）、商標所見、検索性評価。複数候補なら最後に比較表と推奨順位。
+## Requirements
 
-## 依存
+`curl` / `whois` / `python3` / `bash`（macOS・Linux）。
 
-`curl` / `whois` / `python3` / `bash`（macOS・Linux で動作）。
+## Caveats
 
-## 制限
-
-- 商標 DB の正式検索（J-PlatPat / USPTO / EUIPO）は自動化していない。リスクが見えた候補は正式な商標調査（弁理士）を推奨
+- 商標 DB の正式検索(J-PlatPat / USPTO / EUIPO)は自動化していない。リスクが見えた候補は正式な商標調査(弁理士)を推奨
 - GitHub API は未認証だと 60 回/時。大量候補を一度に調べると `unknown` が出得る
 - **簡易調査であり法的助言ではない**
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 O6lvl4

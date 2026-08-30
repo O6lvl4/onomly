@@ -1,9 +1,9 @@
 ---
-name: name-check
-description: プロダクト名候補のデューデリジェンス調査。名前(複数可)を渡すと、パッケージレジストリ・ドメイン・GitHub・既存プロダクト・商標・多言語の観点で衝突を定型チェックし、判定付きレポートを出す。Use when the user wants to vet a product/project name candidate (e.g. "/name-check Foo Bar" or "この名前どう?").
+name: onomly
+description: プロダクト名候補のデューデリジェンス調査。名前(複数可)を渡すと、パッケージレジストリ・ドメイン・GitHub・既存プロダクト・商標・多言語の観点で衝突を定型チェックし、判定付きレポートを出す。Use when the user wants to vet a product/project name candidate (e.g. "/onomly Foo Bar" or "この名前どう?").
 ---
 
-# Name Check — プロダクト名デューデリジェンス
+# onomly — プロダクト名デューデリジェンス
 
 引数で渡された名前候補(スペース区切りで複数可)を以下の定型手順で調査し、判定付きレポートを出す。引数がない場合は候補名を聞き返す。
 
@@ -12,7 +12,7 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 ### 1. 機械チェック(スクリプト)
 
 ```bash
-bash ~/.claude/skills/name-check/check.sh <name> [name2 ...]
+bash ~/.claude/skills/onomly/check.sh <name> [name2 ...]
 ```
 
 チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、RDAP→whoisフォールバック)。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する。

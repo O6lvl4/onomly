@@ -3,7 +3,7 @@
 # Usage: check.sh <name> [name2 ...]
 set -u
 
-check() { curl -sL -o /dev/null -w "%{http_code}" -A "name-check-skill" --max-time 10 "$1"; }
+check() { curl -sL -o /dev/null -w "%{http_code}" -A "onomly-skill" --max-time 10 "$1"; }
 
 # 404 = nobody owns it, 200 = taken
 registry() {
