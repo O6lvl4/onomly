@@ -12,10 +12,16 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 ### 1. 機械チェック(スクリプト)
 
 ```bash
+almide run ~/.claude/skills/onomly/check.almd -- <name> [name2 ...]
+```
+
+almide が無い、または 0.61.0 未満の環境では bash 版にフォールバック:
+
+```bash
 bash ~/.claude/skills/onomly/check.sh <name> [name2 ...]
 ```
 
-チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、RDAP→whoisフォールバック)。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する。
+チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)。Almide 版は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する。
 
 ### 2. 既存プロダクト・商標のWeb検索
 

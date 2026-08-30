@@ -1,0 +1,104 @@
+// onomly check engine — package registries, GitHub username, domains.
+// Almide port of check.sh: EVERY probe of EVERY name runs in one parallel
+// fan.settle, so a full report costs one slowest probe, not a serial walk.
+// Requires almide >= 0.61.0 (http.request_status keeps the status code:
+// 404 = nobody owns the name, 200 = taken).
+//
+// Domains: authoritative RDAP where a live endpoint exists (.com Verisign,
+// .dev Google, .org PIR — rdap.org is a redirector the raw client cannot
+// follow), whois for the TLDs whose RDAP is dead (.io, .ai; macOS whois
+// answers .dev with the IANA TLD object, so whois cannot cover .dev).
+//
+// Usage: almide run check.almd -- <name> [name2 ...]
+import http
+import process
+
+fn verdict(code: Int) -> String = match code {
+  404 => "AVAILABLE",
+  200 => "taken",
+  0   => "unknown (transport)",
+  _   => "unknown (http ${int.to_string(code)})",
+}
+
+// Status of a GET, transport failure collapsed to 0.
+effect fn status_of(url: String) -> Int = {
+  let r = http.request_status("GET", url, "", ["User-Agent": "onomly-skill"])
+  match r {
+    ok((code, _)) => code,
+    err(_) => 0,
+  }
+}
+
+fn classify_whois(out: String) -> String = {
+  let w = string.to_lower(out)
+  if string.contains(w, "registrar:") or string.contains(w, "creation date:")
+  then "registered (whois)"
+  else if string.contains(w, "no match") or string.contains(w, "not found")
+       or string.contains(w, "no object found") or string.contains(w, "is available")
+  then "AVAILABLE (whois)"
+  else "unknown (whois unclear)"
+}
+
+effect fn whois_check(d: String) -> String = {
+  let w = process.exec_status_timeout("whois", [d], 10000)
+  match w {
+    ok(st) => classify_whois(st.stdout),
+    err(_) => "unknown (whois failed)",
+  }
+}
+
+// Authoritative RDAP: the registry itself answers, so BOTH directions are
+// trusted — 200 registered, 404 available; anything else falls to whois.
+effect fn rdap_check(url: String, d: String) -> String = {
+  let code = status_of(url)!
+  match code {
+    200 => "registered (RDAP)",
+    404 => "AVAILABLE (RDAP)",
+    _   => whois_check(d)!,
+  }
+}
+
+fn pad(label: String) -> String =
+  if string.len(label) < 12 then label + string.repeat(" ", 12 - string.len(label))
+  else label + " "
+
+// row = (label, kind, target, extra): hdr / reg / rdap (extra = domain) / whois
+effect fn run_row(row: (String, String, String, String)) -> String = match row {
+  (raw, "hdr", key, _)    => "\n=== ${raw} (lookup key: ${key}) ===",
+  (label, "reg", url, _)  => "${pad(label)} ${verdict(status_of(url)!)}",
+  (label, "rdap", url, d) => "${pad(label)} ${rdap_check(url, d)!}",
+  (label, _, d, _)        => "${pad(label)} ${whois_check(d)!}",
+}
+
+fn rows(raw: String) -> List[(String, String, String, String)] = {
+  let name = string.to_lower(raw)
+  [
+    (raw,         "hdr",   name, ""),
+    ("npm",       "reg",   "https://registry.npmjs.org/${name}", ""),
+    ("crates.io", "reg",   "https://crates.io/api/v1/crates/${name}", ""),
+    ("PyPI",      "reg",   "https://pypi.org/pypi/${name}/json", ""),
+    ("RubyGems",  "reg",   "https://rubygems.org/api/v1/gems/${name}.json", ""),
+    ("Homebrew",  "reg",   "https://formulae.brew.sh/api/formula/${name}.json", ""),
+    ("GitHub",    "reg",   "https://api.github.com/users/${name}", ""),
+    (".com",      "rdap",  "https://rdap.verisign.com/com/v1/domain/${name}.com", "${name}.com"),
+    (".ai",       "whois", "${name}.ai", ""),
+    (".io",       "whois", "${name}.io", ""),
+    (".dev",      "rdap",  "https://pubapi.registry.google/rdap/domain/${name}.dev", "${name}.dev"),
+    (".org",      "rdap",  "https://rdap.publicinterestregistry.org/rdap/domain/${name}.org", "${name}.org"),
+  ]
+}
+
+effect fn main() -> Unit = {
+  let names = list.drop(process.args(), 1)
+  if list.len(names) == 0 then println("usage: almide run check.almd -- <name> [name2 ...]")
+  else {
+    let all = names |> list.flat_map((n) => rows(n))
+    let outs = fan.settle(all, (row) => run_row(row))
+    for r in outs {
+      match r {
+        ok(line) => println(line),
+        err(e)   => println("unknown (${e})"),
+      }
+    }
+  }
+}
