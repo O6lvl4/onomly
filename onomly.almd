@@ -90,7 +90,7 @@ fn rows(raw: String) -> List[(String, String, String, String)] = {
 
 effect fn main() -> Unit = {
   let names = list.drop(process.args(), 1)
-  if list.len(names) == 0 then println("usage: almide run onomly.almd -- <name> [name2 ...]")
+  if list.len(names) == 0 then println("usage: onomly <name> [name2 ...]")
   else {
     let all = names |> list.flat_map((n) => rows(n))
     let outs = fan.settle(all, (row) => run_row(row))
