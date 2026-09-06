@@ -76,7 +76,7 @@ chmod +x onomly
 
 | # | 角度 | 内容 |
 |---|------|------|
-| 1 | **机械检查** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / 域名(`.com .ai .io .dev .org`,权威 RDAP → whois) |
+| 1 | **机械检查** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / 域名(`.com .ai .io .dev .org`,权威 RDAP → whois)+ TMview 商标筛查(日美欧一次查询) |
 | 2 | **现有产品与商标** | 用英日双语做 Web 搜索:同名产品、通用词化、与知名 CS 术语的冲突 |
 | 3 | **多语言与文化** | 英·西·法·德·中·日中的负面含义 / 俚语,发音难度,拼写唯一性 |
 | 4 | **搜索性与 LLM 可辨识性** | 能否独占搜索结果,AI 是否会与其他产品混淆,商标显著性 |
@@ -97,8 +97,8 @@ chmod +x onomly
 
 ## Caveats
 
-- 未自动化商标数据库的正式检索(J-PlatPat / USPTO / EUIPO)。发现风险的候选名,
-  报告会建议在采用前进行正式商标调查(委托律师 / 代理人)
+- 商标通过 TMview 筛查(一次查询横跨约 75 个注册局,含 JPO / USPTO / EUIPO)同名文字商标。
+  这只是筛查而非清查(不做类别与近似判断)— 发现风险仍建议采用前进行正式商标调查(委托律师 / 代理人)
 - GitHub API 未认证时限制为 60 次 / 小时,一次查询大量候选名可能返回 `unknown`
 - **这只是快速调查,不构成法律意见**
 

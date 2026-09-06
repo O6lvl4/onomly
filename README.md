@@ -77,7 +77,7 @@ by CI from `onomly.almd` with the release almide compiler.)
 
 | # | Angle | Details |
 |---|-------|---------|
-| 1 | **Mechanical check** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / domains (`.com .ai .io .dev .org`, authoritative RDAP → whois) |
+| 1 | **Mechanical check** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / domains (`.com .ai .io .dev .org`, authoritative RDAP → whois) + a TMview trademark screen (JP / US / EU in one query) |
 | 2 | **Existing products & trademarks** | Web search in English and Japanese: same-name products, genericized terms, collisions with well-known CS vocabulary |
 | 3 | **Languages & culture** | Negative meanings / slang across EN·ES·FR·DE·ZH·JA, pronounceability, spelling uniqueness |
 | 4 | **Searchability & LLM distinguishability** | Odds of owning the search results, AI confusing it with another product, trademark distinctiveness |
@@ -99,8 +99,9 @@ One of, in preference order: [`almide`](https://github.com/almide/almide/release
 
 ## Caveats
 
-- Formal trademark-database searches (J-PlatPat / USPTO / EUIPO) are not automated. When a
-  candidate shows risk, the report says to get a formal trademark search (an attorney) before adopting
+- The trademark screen queries TMview — one request across ~75 registers including JPO / USPTO /
+  EUIPO — for same-name word marks. A screen, not clearance: no Nice-class or similarity
+  judgement, so on any risk the report still says to get a formal search (an attorney) before adopting
 - The GitHub API allows 60 unauthenticated requests/hour; a large batch can come back `unknown`
 - **A quick survey, not legal advice**
 

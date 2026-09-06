@@ -36,7 +36,7 @@ curl -sL https://github.com/O6lvl4/onomly/releases/latest/download/onomly-<platf
 ${CLAUDE_SKILL_DIR}/onomly-bin <name> [name2 ...]
 ```
 
-チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)。(a)(b) は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する — wasm 版は WASI に子プロセスが無いため `.io` / `.ai` が常に `unknown (needs whois)` になるので、その 2 項目は whois で手動確認する。
+チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)+ TMview 商標スクリーン(日米欧を 1 クエリ、同名ワードマーク数)。(a)(b) は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する — wasm 版は WASI に子プロセスが無いため `.io` / `.ai` が常に `unknown (needs whois)` になるので、その 2 項目は whois で手動確認する。
 
 ### 2. 既存プロダクト・商標のWeb検索
 
@@ -71,6 +71,6 @@ WebSearch を英語と日本語の両方で実行する(独立なので並列で
 
 ## 注意
 
-- 商標DBの正式検索(J-PlatPat / USPTO / EUIPO)は自動化していない。リスクが見えた候補には「採用前に正式な商標調査(弁理士)を推奨」と明記する
+- 商標は TMview(JPO / USPTO / EUIPO 含む約 75 庁横断)の同名スクリーンのみ自動化。称呼類似・区分の判断はしないので、リスクが見えた候補には「採用前に正式な商標調査(弁理士)を推奨」と明記する
 - GitHub API は未認証だと 60回/時 の制限がある。大量候補を一度に調べると `unknown` になり得る
 - ここでの判定は簡易調査であり法的助言ではない

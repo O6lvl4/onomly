@@ -11,6 +11,7 @@
 //
 // Usage: almide run onomly.almd -- <name> [name2 ...]
 import http
+import json
 import process
 
 fn verdict(code: Int) -> String = match code {
@@ -63,10 +64,47 @@ fn pad(label: String) -> String =
   else label + " "
 
 // row = (label, kind, target, extra): hdr / reg / rdap (extra = domain) / whois
+
+// TMview cross-register screen (JP / US / EM in one query, ~75 offices behind
+// it): counts same-name word marks. A SCREEN, not clearance — no Nice-class
+// or similarity judgement; the report still advises a formal search on risk.
+fn tm_verdict(j: Value, name: String) -> String = {
+  let total = json.get_int(j, "totalResults") ?? -1
+  if total < 0 then "unknown (no count in response)"
+  else if total == 0 then "clear — 0 marks in JP/US/EU"
+  else {
+    let marks = json.get_array(j, "tradeMarks") ?? []
+    let exact = marks
+      |> list.filter((t) => string.to_lower(json.get_string(t, "tmName") ?? "") == name)
+      |> list.len
+    if exact > 0 then "IDENTICAL mark exists — ${int.to_string(total)} hits, attorney advised"
+    else "no identical mark — ${int.to_string(total)} similar hits (screen only)"
+  }
+}
+
+effect fn tm_screen(name: String) -> String = {
+  if string.contains(name, "\"") or string.contains(name, "\\")
+  then "skipped (name has JSON-unsafe chars)"
+  else {
+    let body = "{\"page\":\"1\",\"pageSize\":\"30\",\"criteria\":\"C\",\"basicSearch\":\"${name}\",\"fOffices\":[\"JP\",\"US\",\"EM\"]}"
+    let r = http.request_status("POST", "https://www.tmdn.org/tmview/api/search/results", body, ["User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Content-Type": "application/json"])
+    match r {
+      ok((code, text)) =>
+        if code == 200 then match json.parse(text) {
+          ok(j) => tm_verdict(j, name),
+          err(_) => "unknown (unparseable response)",
+        }
+        else "unknown (http ${int.to_string(code)})",
+      err(_) => "unknown (transport)",
+    }
+  }
+}
+
 effect fn run_row(row: (String, String, String, String)) -> String = match row {
   (raw, "hdr", key, _)    => "\n=== ${raw} (lookup key: ${key}) ===",
   (label, "reg", url, _)  => "${pad(label)} ${verdict(status_of(url)!)}",
   (label, "rdap", url, d) => "${pad(label)} ${rdap_check(url, d)!}",
+  (label, "tm", nm, _)    => "${pad(label)} ${tm_screen(nm)!}",
   (label, _, d, _)        => "${pad(label)} ${whois_check(d)!}",
 }
 
@@ -80,6 +118,7 @@ fn rows(raw: String) -> List[(String, String, String, String)] = {
     ("RubyGems",  "reg",   "https://rubygems.org/api/v1/gems/${name}.json", ""),
     ("Homebrew",  "reg",   "https://formulae.brew.sh/api/formula/${name}.json", ""),
     ("GitHub",    "reg",   "https://api.github.com/users/${name}", ""),
+    ("TM JP/US/EU", "tm", name, ""),
     (".com",      "rdap",  "https://rdap.verisign.com/com/v1/domain/${name}.com", "${name}.com"),
     (".ai",       "whois", "${name}.ai", ""),
     (".io",       "whois", "${name}.io", ""),

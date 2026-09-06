@@ -76,7 +76,7 @@ chmod +x onomly
 
 | # | 観点 | 中身 |
 |---|------|------|
-| 1 | **機械チェック** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / ドメイン(`.com .ai .io .dev .org`、権威 RDAP→whois) |
+| 1 | **機械チェック** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / ドメイン(`.com .ai .io .dev .org`、権威 RDAP→whois)+ TMview 商標スクリーン(日米欧 1 クエリ) |
 | 2 | **既存プロダクト・商標** | 英日で Web 検索。同名プロダクト、一般名詞化、有名 CS 用語との衝突 |
 | 3 | **多言語・文化** | 英西仏独中日でのネガティブな意味・スラング、発音・綴りの一意性 |
 | 4 | **検索性・LLM 識別性** | 検索独占の見込み、AI が別物と混同しないか、商標の識別力 |
@@ -96,7 +96,7 @@ almide が無い環境では、同封の `onomly.wasm`(同じエンジンを WAS
 
 ## Caveats
 
-- 商標 DB の正式検索(J-PlatPat / USPTO / EUIPO)は自動化していない。リスクが見えた候補は正式な商標調査(弁理士)を推奨
+- 商標は TMview(JPO / USPTO / EUIPO 含む約 75 庁横断)で同名ワードマークをスクリーニング。スクリーンでありクリアランスではない(称呼類似・区分判断はしない)ので、リスクが見えた候補は正式な商標調査(弁理士)を推奨
 - GitHub API は未認証だと 60 回/時。大量候補を一度に調べると `unknown` が出得る
 - **簡易調査であり法的助言ではない**
 
