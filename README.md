@@ -62,14 +62,16 @@ With no arguments it asks for candidates.
 
 ## CLI
 
-The engine also runs standalone — one command, best engine wins:
+The engine is also a real single-binary CLI — zero dependencies, no shell wrapper:
 
 ```sh
-~/.claude/skills/onomly/onomly react vue svelte
+curl -L https://github.com/O6lvl4/onomly/releases/latest/download/onomly-macos-aarch64 -o onomly
+chmod +x onomly
+./onomly react vue svelte
 ```
 
-Detection order: native almide → the bundled WASI 0.3 component under wasmtime → serial bash.
-Force one with `ONOMLY_ENGINE=almide|wasm|bash` (the wasm engine is the fastest sweep — no whois wait).
+(`onomly-linux-x86_64` and `onomly-linux-aarch64` are attached too; every binary is built
+by CI from `onomly.almd` with the release almide compiler.)
 
 ## What it checks
 
@@ -89,11 +91,11 @@ assessment. Multiple candidates end with a comparison table and a ranking.
 The mechanical check (`onomly.almd`) is written in [Almide](https://github.com/almide/almide).
 Every probe of every name (6 registries + 5 domains) runs in one parallel `fan.settle`, and
 v0.61.0's `http.request_status` reads the status code directly (404 = nobody owns it,
-200 = taken). Environments without almide run the bundled `onomly.wasm` — the same engine compiled to a WASI 0.3 component (http-only: the whois TLDs `.io` / `.ai` ask for a manual check) — under wasmtime's native async; `onomly.sh`, the serial bash edition, remains the last-resort fallback.
+200 = taken). Environments without almide run the bundled `onomly.wasm` — the same engine compiled to a WASI 0.3 component (http-only: the whois TLDs `.io` / `.ai` ask for a manual check) — under wasmtime's native async; and the release page carries native single-file binaries built from the same source. No shell scripts anywhere.
 
 ## Requirements
 
-One of, in preference order: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois` (full verdicts, fastest); [`wasmtime`](https://wasmtime.dev) >= 46 (runs the bundled WASI 0.3 component, http-only); or `curl` / `whois` / `bash` for the serial fallback (macOS / Linux).
+One of, in preference order: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois` (full verdicts); [`wasmtime`](https://wasmtime.dev) >= 46 (runs the bundled WASI 0.3 component, http-only); or nothing at all — grab a native binary from [releases](https://github.com/O6lvl4/onomly/releases).
 
 ## Caveats
 

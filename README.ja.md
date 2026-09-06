@@ -61,14 +61,16 @@ Claude Code を再起動すると `/onomly` が使える。
 
 ## CLI
 
-エンジン単体でも 1 コマンドで動く — 最良エンジンが自動で選ばれる:
+エンジンは依存ゼロの単一バイナリ CLI としても配布 — シェルラッパー無し:
 
 ```sh
-~/.claude/skills/onomly/onomly react vue svelte
+curl -L https://github.com/O6lvl4/onomly/releases/latest/download/onomly-macos-aarch64 -o onomly
+chmod +x onomly
+./onomly react vue svelte
 ```
 
-検出順: native almide → 同封 WASI 0.3 コンポーネント on wasmtime → bash 直列。
-`ONOMLY_ENGINE=almide|wasm|bash` で強制可(wasm エンジンは whois 待ちが無いぶん最速)。
+(`onomly-linux-x86_64` / `onomly-linux-aarch64` も添付。どのバイナリも CI が
+`onomly.almd` からリリース版 almide コンパイラでビルドしたもの。)
 
 ## What it checks
 
@@ -86,11 +88,11 @@ Claude Code を再起動すると `/onomly` が使える。
 機械チェック部は [Almide](https://github.com/almide/almide) 製(`onomly.almd`)。
 名前 × 11 プローブ(レジストリ 6 + ドメイン 5)を `fan.settle` で一斉並列にし、
 v0.61.0 の `http.request_status` でステータスコードを直接判定する(404 = 空き、200 = 使用中)。
-almide が無い環境では、同封の `onomly.wasm`(同じエンジンを WASI 0.3 コンポーネントにコンパイルしたもの。http-only で `.io` / `.ai` は手動確認)を wasmtime の native async で実行し、それも無ければ bash 直列版 `onomly.sh` に落ちる。
+almide が無い環境では、同封の `onomly.wasm`(同じエンジンを WASI 0.3 コンポーネントにコンパイルしたもの。http-only で `.io` / `.ai` は手動確認)を wasmtime の native async で実行。リリースには同じソースからビルドしたネイティブ単一バイナリも添付。シェルスクリプトは一切無い。
 
 ## Requirements
 
-優先順にいずれか: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(フル判定・最速)/ [`wasmtime`](https://wasmtime.dev) >= 46(同封 WASI 0.3 コンポーネント、http-only)/ `curl` + `whois` + `bash`(直列フォールバック、macOS・Linux)。
+優先順にいずれか: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(フル判定)/ [`wasmtime`](https://wasmtime.dev) >= 46(同封 WASI 0.3 コンポーネント、http-only)/ 何も無くても [releases](https://github.com/O6lvl4/onomly/releases) のネイティブバイナリで動く。
 
 ## Caveats
 

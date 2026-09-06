@@ -61,14 +61,16 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 
 ## CLI
 
-引擎也可以独立运行 — 一条命令,自动选择最佳引擎:
+引擎也作为零依赖的单文件 CLI 发布 — 没有 shell 包装:
 
 ```sh
-~/.claude/skills/onomly/onomly react vue svelte
+curl -L https://github.com/O6lvl4/onomly/releases/latest/download/onomly-macos-aarch64 -o onomly
+chmod +x onomly
+./onomly react vue svelte
 ```
 
-检测顺序:native almide → wasmtime 运行同捆的 WASI 0.3 组件 → 串行 bash。
-用 `ONOMLY_ENGINE=almide|wasm|bash` 可以强制指定(wasm 引擎无需等待 whois,最快)。
+(还附有 `onomly-linux-x86_64` / `onomly-linux-aarch64`;所有二进制均由 CI
+用发行版 almide 编译器从 `onomly.almd` 构建。)
 
 ## What it checks
 
@@ -87,11 +89,11 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 机械检查部分(`onomly.almd`)由 [Almide](https://github.com/almide/almide) 编写。
 每个名字的全部探测(6 个注册表 + 5 个域名)通过一次 `fan.settle` 并行执行,
 并用 v0.61.0 的 `http.request_status` 直接读取状态码(404 = 无人占用,200 = 已被占用)。
-没有 almide 的环境会用 wasmtime 的原生 async 运行同捆的 `onomly.wasm`(同一引擎编译成的 WASI 0.3 组件,仅 http:`.io` / `.ai` 需手动确认);两者都没有时回退到串行 bash 版 `onomly.sh`。
+没有 almide 的环境会用 wasmtime 的原生 async 运行同捆的 `onomly.wasm`(同一引擎编译成的 WASI 0.3 组件,仅 http:`.io` / `.ai` 需手动确认);发布页还附有用同一源码构建的原生单文件二进制。仓库里没有任何 shell 脚本。
 
 ## Requirements
 
-按优先顺序任选其一:[`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(完整判定、最快)/ [`wasmtime`](https://wasmtime.dev) >= 46(运行同捆的 WASI 0.3 组件,仅 http)/ `curl` + `whois` + `bash`(串行回退,macOS / Linux)。
+按优先顺序任选其一:[`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(完整判定)/ [`wasmtime`](https://wasmtime.dev) >= 46(运行同捆的 WASI 0.3 组件,仅 http)/ 或者什么都不装 — 直接从 [releases](https://github.com/O6lvl4/onomly/releases) 下载原生二进制。
 
 ## Caveats
 

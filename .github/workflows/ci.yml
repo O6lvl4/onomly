@@ -3,9 +3,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  release:
+    types: [published]
 
 jobs:
   engines:
+    if: github.event_name != 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,8 +16,7 @@ jobs:
       - name: Install almide (latest release)
         run: |
           curl -sL https://github.com/almide/almide/releases/latest/download/almide-linux-x86_64.tar.gz | tar xz
-          BIN=$(find . -maxdepth 2 -name almide -type f | head -1)
-          sudo install -m 755 "$BIN" /usr/local/bin/almide
+          sudo install -m 755 almide-linux-x86_64/almide /usr/local/bin/almide
           almide --version
 
       - name: Type-check the Almide engines
@@ -26,17 +28,47 @@ jobs:
       # almide RELEASE ships the wasi:http@0.3 p3 shim (almide/almide#1710) —
       # today only develop builds the component.
 
-      - name: shellcheck the launcher and bash engine
-        run: shellcheck onomly onomly.sh
-
-      - name: Launcher smoke (no network)
-        run: |
-          ./onomly 2>&1 | grep -q "usage:" || { echo "usage line missing"; exit 1; }
-          if ONOMLY_ENGINE=bogus ./onomly x 2>/dev/null; then echo "bogus engine accepted"; exit 1; fi
-          ONOMLY_ENGINE=bogus ./onomly x 2>&1 | grep -q "unknown engine"
-
       - name: Verdict vocabulary parity (static)
         run: |
-          for f in onomly.almd onomly_wasm.almd onomly.sh; do
+          for f in onomly.almd onomly_wasm.almd; do
             grep -q "AVAILABLE" "$f" && grep -q "taken" "$f" || { echo "$f lost the verdict vocabulary"; exit 1; }
           done
+
+  binaries:
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64
+            almide_asset: almide-linux-x86_64
+          - os: ubuntu-24.04-arm
+            target: linux-aarch64
+            almide_asset: almide-linux-aarch64
+          - os: macos-latest
+            target: macos-aarch64
+            almide_asset: almide-macos-aarch64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install almide (latest release)
+        run: |
+          curl -sL "https://github.com/almide/almide/releases/latest/download/${{ matrix.almide_asset }}.tar.gz" | tar xz
+          sudo install -m 755 "${{ matrix.almide_asset }}/almide" /usr/local/bin/almide
+          almide --version
+          rustc --version
+
+      - name: Build the native binary
+        run: almide build onomly.almd -o "onomly-${{ matrix.target }}"
+
+      - name: Smoke (usage line, no network)
+        run: |
+          "./onomly-${{ matrix.target }}" 2>&1 | grep -q "usage:" || { echo "usage line missing"; exit 1; }
+
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "onomly-${{ matrix.target }}" --clobber

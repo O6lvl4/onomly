@@ -11,11 +11,30 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 
 ### 1. 機械チェック(スクリプト)
 
+エンジンを上から順に検出し、最初に使えるもので実行する:
+
+**(a) `almide` >= 0.61.0 がある**(最速・whois 込みのフル判定):
+
 ```bash
-${CLAUDE_SKILL_DIR}/onomly <name> [name2 ...]
+almide run ${CLAUDE_SKILL_DIR}/onomly.almd -- <name> [name2 ...]
 ```
 
-launcher が最良エンジンを自動検出する: native almide(whois 込みフル判定)→ 同封 WASI 0.3 コンポーネント on wasmtime(http-only)→ bash 直列。`ONOMLY_ENGINE=almide|wasm|bash` で強制できる。
+**(b) `wasmtime` がある**(同封 WASI 0.3 コンポーネント。http-only なので .io / .ai は後で whois 手動確認):
+
+```bash
+echo "<name> [name2 ...]" | wasmtime run \
+  -W component-model-async=y,component-model-more-async-builtins=y \
+  -S p3=y -S http=y ${CLAUDE_SKILL_DIR}/onomly.wasm
+```
+
+**(c) どちらも無い**: リリースのネイティブバイナリを一度だけ取得して実行(フル判定):
+
+```bash
+# プラットフォーム: onomly-linux-x86_64 / onomly-linux-aarch64 / onomly-macos-aarch64
+curl -sL https://github.com/O6lvl4/onomly/releases/latest/download/onomly-<platform> \
+  -o ${CLAUDE_SKILL_DIR}/onomly-bin && chmod +x ${CLAUDE_SKILL_DIR}/onomly-bin
+${CLAUDE_SKILL_DIR}/onomly-bin <name> [name2 ...]
+```
 
 チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)。(a)(b) は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する — wasm 版は WASI に子プロセスが無いため `.io` / `.ai` が常に `unknown (needs whois)` になるので、その 2 項目は whois で手動確認する。
 
