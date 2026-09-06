@@ -64,6 +64,10 @@ jobs:
       - name: Build the native binary
         run: almide build onomly.almd -o "onomly-${{ matrix.target }}"
 
+      - name: Strip debug info (Linux embeds DWARF in the ELF; macOS never links it in)
+        if: runner.os == 'Linux'
+        run: strip "onomly-${{ matrix.target }}"
+
       - name: Smoke (usage line, no network)
         run: |
           "./onomly-${{ matrix.target }}" 2>&1 | grep -q "usage:" || { echo "usage line missing"; exit 1; }
