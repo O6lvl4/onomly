@@ -62,12 +62,11 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 机械检查部分(`check.almd`)由 [Almide](https://github.com/almide/almide) 编写。
 每个名字的全部探测(6 个注册表 + 5 个域名)通过一次 `fan.settle` 并行执行,
 并用 v0.61.0 的 `http.request_status` 直接读取状态码(404 = 无人占用,200 = 已被占用)。
-没有 almide 的环境会回退到串行 bash 版 `check.sh`。
+没有 almide 的环境会用 wasmtime 的原生 async 运行同捆的 `check.wasm`(同一引擎编译成的 WASI 0.3 组件,仅 http:`.io` / `.ai` 需手动确认);两者都没有时回退到串行 bash 版 `check.sh`。
 
 ## Requirements
 
-[`almide`](https://github.com/almide/almide/releases) >= 0.61.0(推荐)/ `whois`。
-回退用的 `check.sh` 需要 `curl` / `whois` / `bash`(macOS / Linux)。
+按优先顺序任选其一:[`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(完整判定、最快)/ [`wasmtime`](https://wasmtime.dev) >= 46(运行同捆的 WASI 0.3 组件,仅 http)/ `curl` + `whois` + `bash`(串行回退,macOS / Linux)。
 
 ## Caveats
 

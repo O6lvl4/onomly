@@ -61,12 +61,11 @@ Claude Code を再起動すると `/onomly` が使える。
 機械チェック部は [Almide](https://github.com/almide/almide) 製(`check.almd`)。
 名前 × 11 プローブ(レジストリ 6 + ドメイン 5)を `fan.settle` で一斉並列にし、
 v0.61.0 の `http.request_status` でステータスコードを直接判定する(404 = 空き、200 = 使用中)。
-almide が無い環境では bash 直列版 `check.sh` にフォールバック。
+almide が無い環境では、同封の `check.wasm`(同じエンジンを WASI 0.3 コンポーネントにコンパイルしたもの。http-only で `.io` / `.ai` は手動確認)を wasmtime の native async で実行し、それも無ければ bash 直列版 `check.sh` に落ちる。
 
 ## Requirements
 
-[`almide`](https://github.com/almide/almide/releases) >= 0.61.0(推奨)/ `whois`。
-フォールバックの `check.sh` は `curl` / `whois` / `bash`（macOS・Linux）。
+優先順にいずれか: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(フル判定・最速)/ [`wasmtime`](https://wasmtime.dev) >= 46(同封 WASI 0.3 コンポーネント、http-only)/ `curl` + `whois` + `bash`(直列フォールバック、macOS・Linux)。
 
 ## Caveats
 

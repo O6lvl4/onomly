@@ -11,17 +11,22 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 
 ### 1. 機械チェック(スクリプト)
 
+エンジンは 3 段構え。上から順に検出し、最初に使えるものを実行する:
+
 ```bash
+# (a) almide >= 0.61.0 があれば(最速・whois 込みのフル判定)
 almide run ~/.claude/skills/onomly/check.almd -- <name> [name2 ...]
-```
 
-almide が無い、または 0.61.0 未満の環境では bash 版にフォールバック:
+# (b) 無ければ、同封の WASI 0.3 コンポーネントを wasmtime で(http-only)
+echo "<name> [name2 ...]" | wasmtime run \
+  -W component-model-async=y,component-model-more-async-builtins=y \
+  -S p3=y -S http=y ~/.claude/skills/onomly/check.wasm
 
-```bash
+# (c) どちらも無ければ bash 直列版
 bash ~/.claude/skills/onomly/check.sh <name> [name2 ...]
 ```
 
-チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)。Almide 版は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する。
+チェック内容: npm / crates.io / PyPI / RubyGems / Homebrew / GitHub ユーザー名 / ドメイン(.com .ai .io .dev .org、権威 RDAP→whois)。(a)(b) は全名前×全プローブを並列実行するので、複数候補でも十数秒で返る。出力は `AVAILABLE` / `taken` / `registered` で判定済み。`unknown` が出た項目だけ手動で追調査する — wasm 版は WASI に子プロセスが無いため `.io` / `.ai` が常に `unknown (needs whois)` になるので、その 2 項目は whois で手動確認する。
 
 ### 2. 既存プロダクト・商標のWeb検索
 

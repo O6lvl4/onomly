@@ -1,0 +1,84 @@
+// onomly check engine — WASI 0.3 component edition: runs under bare wasmtime,
+// no almide install needed. Same parallel fan.settle as check.almd, http-only:
+// WASI has no subprocess API, so the whois TLDs (.io, .ai) report
+// "unknown (needs whois)" and the report says to check them manually.
+//
+// Names arrive on stdin, space/newline separated:
+//   echo "name1 name2" | wasmtime run \
+//     -W component-model-async=y,component-model-more-async-builtins=y \
+//     -S p3=y -S http=y check.wasm
+//
+// Rebuild (almide >= this repo's pinned feature set):
+//   ALMIDE_COMPONENT_P3=1 almide build check_wasm.almd --target wasm --component -o check.wasm
+import http
+import io
+
+fn verdict(code: Int) -> String = match code {
+  404 => "AVAILABLE",
+  200 => "taken",
+  0   => "unknown (transport)",
+  _   => "unknown (http ${int.to_string(code)})",
+}
+
+fn rdap_verdict(code: Int) -> String = match code {
+  200 => "registered (RDAP)",
+  404 => "AVAILABLE (RDAP)",
+  0   => "unknown (transport)",
+  _   => "unknown (rdap ${int.to_string(code)})",
+}
+
+effect fn status_of(url: String) -> Int = {
+  let r = http.request_status("GET", url, "", ["User-Agent": "onomly-skill"])
+  match r {
+    ok((code, _)) => code,
+    err(_) => 0,
+  }
+}
+
+fn pad(label: String) -> String =
+  if string.len(label) < 12 then label + string.repeat(" ", 12 - string.len(label))
+  else label + " "
+
+// row = (label, kind, target): hdr / reg / rdap / manual (target = the note)
+effect fn run_row(row: (String, String, String)) -> String = match row {
+  (raw, "hdr", key)    => "\n=== ${raw} (lookup key: ${key}) ===",
+  (label, "reg", url)  => "${pad(label)} ${verdict(status_of(url)!)}",
+  (label, "rdap", url) => "${pad(label)} ${rdap_verdict(status_of(url)!)}",
+  (label, _, note)     => "${pad(label)} ${note}",
+}
+
+fn rows(raw: String) -> List[(String, String, String)] = {
+  let name = string.to_lower(raw)
+  [
+    (raw,         "hdr",    name),
+    ("npm",       "reg",    "https://registry.npmjs.org/${name}"),
+    ("crates.io", "reg",    "https://crates.io/api/v1/crates/${name}"),
+    ("PyPI",      "reg",    "https://pypi.org/pypi/${name}/json"),
+    ("RubyGems",  "reg",    "https://rubygems.org/api/v1/gems/${name}.json"),
+    ("Homebrew",  "reg",    "https://formulae.brew.sh/api/formula/${name}.json"),
+    ("GitHub",    "reg",    "https://api.github.com/users/${name}"),
+    (".com",      "rdap",   "https://rdap.verisign.com/com/v1/domain/${name}.com"),
+    (".ai",       "manual", "unknown (needs whois — check manually)"),
+    (".io",       "manual", "unknown (needs whois — check manually)"),
+    (".dev",      "rdap",   "https://pubapi.registry.google/rdap/domain/${name}.dev"),
+    (".org",      "rdap",   "https://rdap.publicinterestregistry.org/rdap/domain/${name}.org"),
+  ]
+}
+
+effect fn main() -> Unit = {
+  let names = io.read_all()!
+    |> string.lines
+    |> list.flat_map((l) => string.split(l, " "))
+    |> list.filter((w) => string.len(string.trim(w)) > 0)
+  if list.len(names) == 0 then println("usage: echo \"name1 name2\" | wasmtime run -W component-model-async=y,component-model-more-async-builtins=y -S p3=y -S http=y check.wasm")
+  else {
+    let all = names |> list.flat_map((n) => rows(string.trim(n)))
+    let outs = fan.settle(all, (row) => run_row(row))
+    for r in outs {
+      match r {
+        ok(line) => println(line),
+        err(e)   => println("unknown (${e})"),
+      }
+    }
+  }
+}

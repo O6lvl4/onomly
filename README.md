@@ -64,12 +64,11 @@ assessment. Multiple candidates end with a comparison table and a ranking.
 The mechanical check (`check.almd`) is written in [Almide](https://github.com/almide/almide).
 Every probe of every name (6 registries + 5 domains) runs in one parallel `fan.settle`, and
 v0.61.0's `http.request_status` reads the status code directly (404 = nobody owns it,
-200 = taken). Environments without almide fall back to `check.sh`, the serial bash edition.
+200 = taken). Environments without almide run the bundled `check.wasm` — the same engine compiled to a WASI 0.3 component (http-only: the whois TLDs `.io` / `.ai` ask for a manual check) — under wasmtime's native async; `check.sh`, the serial bash edition, remains the last-resort fallback.
 
 ## Requirements
 
-[`almide`](https://github.com/almide/almide/releases) >= 0.61.0 (recommended) / `whois`.
-The `check.sh` fallback needs `curl` / `whois` / `bash` (macOS / Linux).
+One of, in preference order: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois` (full verdicts, fastest); [`wasmtime`](https://wasmtime.dev) >= 46 (runs the bundled WASI 0.3 component, http-only); or `curl` / `whois` / `bash` for the serial fallback (macOS / Linux).
 
 ## Caveats
 
