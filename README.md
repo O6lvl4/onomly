@@ -46,6 +46,17 @@ Restart Claude Code and `/onomly` is ready.
 
 With no arguments it asks for candidates.
 
+## CLI
+
+The engine also runs standalone — one command, best engine wins:
+
+```sh
+~/.claude/skills/onomly/onomly react vue svelte
+```
+
+Detection order: native almide → the bundled WASI 0.3 component under wasmtime → serial bash.
+Force one with `ONOMLY_ENGINE=almide|wasm|bash` (the wasm engine is the fastest sweep — no whois wait).
+
 ## What it checks
 
 | # | Angle | Details |

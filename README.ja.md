@@ -45,6 +45,17 @@ Claude Code を再起動すると `/onomly` が使える。
 
 引数なしなら候補名を聞き返す。
 
+## CLI
+
+エンジン単体でも 1 コマンドで動く — 最良エンジンが自動で選ばれる:
+
+```sh
+~/.claude/skills/onomly/onomly react vue svelte
+```
+
+検出順: native almide → 同封 WASI 0.3 コンポーネント on wasmtime → bash 直列。
+`ONOMLY_ENGINE=almide|wasm|bash` で強制可(wasm エンジンは whois 待ちが無いぶん最速)。
+
 ## What it checks
 
 | # | 観点 | 中身 |

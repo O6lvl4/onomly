@@ -45,6 +45,17 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 
 不带参数时会询问候选名。
 
+## CLI
+
+引擎也可以独立运行 — 一条命令,自动选择最佳引擎:
+
+```sh
+~/.claude/skills/onomly/onomly react vue svelte
+```
+
+检测顺序:native almide → wasmtime 运行同捆的 WASI 0.3 组件 → 串行 bash。
+用 `ONOMLY_ENGINE=almide|wasm|bash` 可以强制指定(wasm 引擎无需等待 whois,最快)。
+
 ## What it checks
 
 | # | 角度 | 内容 |
