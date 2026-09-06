@@ -1,15 +1,15 @@
 // onomly check engine — WASI 0.3 component edition: runs under bare wasmtime,
-// no almide install needed. Same parallel fan.settle as check.almd, http-only:
+// no almide install needed. Same parallel fan.settle as onomly.almd, http-only:
 // WASI has no subprocess API, so the whois TLDs (.io, .ai) report
 // "unknown (needs whois)" and the report says to check them manually.
 //
 // Names arrive on stdin, space/newline separated:
 //   echo "name1 name2" | wasmtime run \
 //     -W component-model-async=y,component-model-more-async-builtins=y \
-//     -S p3=y -S http=y check.wasm
+//     -S p3=y -S http=y onomly.wasm
 //
 // Rebuild (almide >= this repo's pinned feature set):
-//   ALMIDE_COMPONENT_P3=1 almide build check_wasm.almd --target wasm --component -o check.wasm
+//   ALMIDE_COMPONENT_P3=1 almide build onomly_wasm.almd --target wasm --component -o onomly.wasm
 import http
 import io
 
@@ -70,7 +70,7 @@ effect fn main() -> Unit = {
     |> string.lines
     |> list.flat_map((l) => string.split(l, " "))
     |> list.filter((w) => string.len(string.trim(w)) > 0)
-  if list.len(names) == 0 then println("usage: echo \"name1 name2\" | wasmtime run -W component-model-async=y,component-model-more-async-builtins=y -S p3=y -S http=y check.wasm")
+  if list.len(names) == 0 then println("usage: echo \"name1 name2\" | wasmtime run -W component-model-async=y,component-model-more-async-builtins=y -S p3=y -S http=y onomly.wasm")
   else {
     let all = names |> list.flat_map((n) => rows(string.trim(n)))
     let outs = fan.settle(all, (row) => run_row(row))

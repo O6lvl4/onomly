@@ -60,7 +60,7 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 
 | # | 角度 | 内容 |
 |---|------|------|
-| 1 | **机械检查** (`check.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / 域名(`.com .ai .io .dev .org`,权威 RDAP → whois) |
+| 1 | **机械检查** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / 域名(`.com .ai .io .dev .org`,权威 RDAP → whois) |
 | 2 | **现有产品与商标** | 用英日双语做 Web 搜索:同名产品、通用词化、与知名 CS 术语的冲突 |
 | 3 | **多语言与文化** | 英·西·法·德·中·日中的负面含义 / 俚语,发音难度,拼写唯一性 |
 | 4 | **搜索性与 LLM 可辨识性** | 能否独占搜索结果,AI 是否会与其他产品混淆,商标显著性 |
@@ -70,10 +70,10 @@ git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly
 
 ## Engine
 
-机械检查部分(`check.almd`)由 [Almide](https://github.com/almide/almide) 编写。
+机械检查部分(`onomly.almd`)由 [Almide](https://github.com/almide/almide) 编写。
 每个名字的全部探测(6 个注册表 + 5 个域名)通过一次 `fan.settle` 并行执行,
 并用 v0.61.0 的 `http.request_status` 直接读取状态码(404 = 无人占用,200 = 已被占用)。
-没有 almide 的环境会用 wasmtime 的原生 async 运行同捆的 `check.wasm`(同一引擎编译成的 WASI 0.3 组件,仅 http:`.io` / `.ai` 需手动确认);两者都没有时回退到串行 bash 版 `check.sh`。
+没有 almide 的环境会用 wasmtime 的原生 async 运行同捆的 `onomly.wasm`(同一引擎编译成的 WASI 0.3 组件,仅 http:`.io` / `.ai` 需手动确认);两者都没有时回退到串行 bash 版 `onomly.sh`。
 
 ## Requirements
 

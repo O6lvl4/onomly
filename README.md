@@ -61,7 +61,7 @@ Force one with `ONOMLY_ENGINE=almide|wasm|bash` (the wasm engine is the fastest 
 
 | # | Angle | Details |
 |---|-------|---------|
-| 1 | **Mechanical check** (`check.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / domains (`.com .ai .io .dev .org`, authoritative RDAP → whois) |
+| 1 | **Mechanical check** (`onomly.almd`) | npm / crates.io / PyPI / RubyGems / Homebrew / GitHub / domains (`.com .ai .io .dev .org`, authoritative RDAP → whois) |
 | 2 | **Existing products & trademarks** | Web search in English and Japanese: same-name products, genericized terms, collisions with well-known CS vocabulary |
 | 3 | **Languages & culture** | Negative meanings / slang across EN·ES·FR·DE·ZH·JA, pronounceability, spelling uniqueness |
 | 4 | **Searchability & LLM distinguishability** | Odds of owning the search results, AI confusing it with another product, trademark distinctiveness |
@@ -72,10 +72,10 @@ assessment. Multiple candidates end with a comparison table and a ranking.
 
 ## Engine
 
-The mechanical check (`check.almd`) is written in [Almide](https://github.com/almide/almide).
+The mechanical check (`onomly.almd`) is written in [Almide](https://github.com/almide/almide).
 Every probe of every name (6 registries + 5 domains) runs in one parallel `fan.settle`, and
 v0.61.0's `http.request_status` reads the status code directly (404 = nobody owns it,
-200 = taken). Environments without almide run the bundled `check.wasm` — the same engine compiled to a WASI 0.3 component (http-only: the whois TLDs `.io` / `.ai` ask for a manual check) — under wasmtime's native async; `check.sh`, the serial bash edition, remains the last-resort fallback.
+200 = taken). Environments without almide run the bundled `onomly.wasm` — the same engine compiled to a WASI 0.3 component (http-only: the whois TLDs `.io` / `.ai` ask for a manual check) — under wasmtime's native async; `onomly.sh`, the serial bash edition, remains the last-resort fallback.
 
 ## Requirements
 

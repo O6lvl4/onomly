@@ -25,10 +25,10 @@ if [ -z "$engine" ]; then
 fi
 
 case "$engine" in
-  almide) exec almide run "$DIR/check.almd" -- "$@" ;;
+  almide) exec almide run "$DIR/onomly.almd" -- "$@" ;;
   wasm)   printf '%s\n' "$*" | exec wasmtime run \
             -W component-model-async=y,component-model-more-async-builtins=y \
-            -S p3=y -S http=y "$DIR/check.wasm" ;;
-  bash)   exec bash "$DIR/check.sh" "$@" ;;
+            -S p3=y -S http=y "$DIR/onomly.wasm" ;;
+  bash)   exec bash "$DIR/onomly.sh" "$@" ;;
   *)      echo "onomly: unknown engine '$engine' (almide|wasm|bash)" >&2; exit 2 ;;
 esac

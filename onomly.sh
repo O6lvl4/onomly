@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Product-name availability check: package registries, GitHub, domains.
-# Usage: check.sh <name> [name2 ...]
+# Usage: onomly.sh <name> [name2 ...]
 set -u
 
 check() { curl -sL -o /dev/null -w "%{http_code}" -A "onomly-skill" --max-time 10 "$1"; }

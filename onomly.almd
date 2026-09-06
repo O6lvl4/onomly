@@ -1,5 +1,5 @@
 // onomly check engine — package registries, GitHub username, domains.
-// Almide port of check.sh: EVERY probe of EVERY name runs in one parallel
+// Almide port of onomly.sh: EVERY probe of EVERY name runs in one parallel
 // fan.settle, so a full report costs one slowest probe, not a serial walk.
 // Requires almide >= 0.61.0 (http.request_status keeps the status code:
 // 404 = nobody owns the name, 200 = taken).
@@ -9,7 +9,7 @@
 // follow), whois for the TLDs whose RDAP is dead (.io, .ai; macOS whois
 // answers .dev with the IANA TLD object, so whois cannot cover .dev).
 //
-// Usage: almide run check.almd -- <name> [name2 ...]
+// Usage: almide run onomly.almd -- <name> [name2 ...]
 import http
 import process
 
@@ -90,7 +90,7 @@ fn rows(raw: String) -> List[(String, String, String, String)] = {
 
 effect fn main() -> Unit = {
   let names = list.drop(process.args(), 1)
-  if list.len(names) == 0 then println("usage: almide run check.almd -- <name> [name2 ...]")
+  if list.len(names) == 0 then println("usage: almide run onomly.almd -- <name> [name2 ...]")
   else {
     let all = names |> list.flat_map((n) => rows(n))
     let outs = fan.settle(all, (row) => run_row(row))

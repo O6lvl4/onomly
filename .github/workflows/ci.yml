@@ -1,0 +1,42 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  engines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install almide (latest release)
+        run: |
+          curl -sL https://github.com/almide/almide/releases/latest/download/almide-linux-x86_64.tar.gz | tar xz
+          BIN=$(find . -maxdepth 2 -name almide -type f | head -1)
+          sudo install -m 755 "$BIN" /usr/local/bin/almide
+          almide --version
+
+      - name: Type-check the Almide engines
+        run: |
+          almide check onomly.almd
+          almide check onomly_wasm.almd
+
+      # The bundled onomly.wasm freshness gate (rebuild + compare) joins once an
+      # almide RELEASE ships the wasi:http@0.3 p3 shim (almide/almide#1710) —
+      # today only develop builds the component.
+
+      - name: shellcheck the launcher and bash engine
+        run: shellcheck onomly onomly.sh
+
+      - name: Launcher smoke (no network)
+        run: |
+          ./onomly 2>&1 | grep -q "usage:" || { echo "usage line missing"; exit 1; }
+          if ONOMLY_ENGINE=bogus ./onomly x 2>/dev/null; then echo "bogus engine accepted"; exit 1; fi
+          ONOMLY_ENGINE=bogus ./onomly x 2>&1 | grep -q "unknown engine"
+
+      - name: Verdict vocabulary parity (static)
+        run: |
+          for f in onomly.almd onomly_wasm.almd onomly.sh; do
+            grep -q "AVAILABLE" "$f" && grep -q "taken" "$f" || { echo "$f lost the verdict vocabulary"; exit 1; }
+          done
