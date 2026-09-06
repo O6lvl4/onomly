@@ -5,6 +5,13 @@
 <p align="center"><em>发布之前,先验名。</em></p>
 
 <p align="center">
+  <a href="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml"><img src="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/WASI-0.3_component-654ff0" alt="WASI 0.3">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+</p>
+
+
+<p align="center">
 一个为<strong>产品 / 项目名称候选做尽职调查</strong>的
 <a href="https://claude.com/claude-code">Claude Code</a> 技能。<br>
 按固定流程检查注册表、域名、GitHub 的可用性,同名产品与商标冲突,

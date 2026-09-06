@@ -5,6 +5,13 @@
 <p align="center"><em>Vet the name before you ship it.</em></p>
 
 <p align="center">
+  <a href="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml"><img src="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/WASI-0.3_component-654ff0" alt="WASI 0.3">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+</p>
+
+
+<p align="center">
 A <a href="https://claude.com/claude-code">Claude Code</a> skill for
 <strong>due diligence on product / project name candidates</strong>.<br>
 One fixed sweep — registry, domain, and GitHub availability; existing-product and

@@ -5,6 +5,13 @@
 <p align="center"><em>名前を、出す前に検分する。</em></p>
 
 <p align="center">
+  <a href="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml"><img src="https://github.com/O6lvl4/onomly/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/WASI-0.3_component-654ff0" alt="WASI 0.3">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+</p>
+
+
+<p align="center">
 プロダクト/プロジェクト名候補の<strong>デューデリジェンス調査</strong>をする
 <a href="https://claude.com/claude-code">Claude Code</a> スキル。<br>
 レジストリ・ドメイン・GitHub の空き、既存プロダクト・商標の衝突、多言語での意味、
