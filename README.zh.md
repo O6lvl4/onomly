@@ -35,7 +35,14 @@ npm ✅  crates.io ✅  RubyGems ✅  Homebrew ✅  GitHub ✅
 
 ## Install
 
-克隆到技能目录即可:
+作为 plugin 安装(推荐):
+
+```
+/plugin marketplace add O6lvl4/onomly
+/plugin install onomly@onomly
+```
+
+或克隆到技能目录:
 
 ```sh
 git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly

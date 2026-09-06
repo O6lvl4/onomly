@@ -36,7 +36,14 @@ only PyPI taken
 
 ## Install
 
-Clone into your skills directory:
+As a plugin (recommended):
+
+```
+/plugin marketplace add O6lvl4/onomly
+/plugin install onomly@onomly
+```
+
+Or clone into your skills directory:
 
 ```sh
 git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly

@@ -35,7 +35,14 @@ PyPI だけ taken
 
 ## Install
 
-スキルディレクトリに clone するだけ。
+plugin として(推奨):
+
+```
+/plugin marketplace add O6lvl4/onomly
+/plugin install onomly@onomly
+```
+
+またはスキルディレクトリに clone:
 
 ```sh
 git clone https://github.com/O6lvl4/onomly ~/.claude/skills/onomly

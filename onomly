@@ -3,7 +3,7 @@
 #   native almide -> bundled WASI 0.3 component under wasmtime -> serial bash.
 # Usage: onomly <name> [name2 ...]      Force: ONOMLY_ENGINE=almide|wasm|bash
 set -eu
-DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 if [ $# -lt 1 ] || [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   echo "usage: onomly <name> [name2 ...]   (ONOMLY_ENGINE=almide|wasm|bash to force)" >&2
   exit 2

@@ -1,0 +1,13 @@
+{
+  "name": "onomly",
+  "owner": {
+    "name": "O6lvl4"
+  },
+  "plugins": [
+    {
+      "name": "onomly",
+      "source": ".",
+      "description": "Product-name due diligence skill — parallel availability sweep in Almide, bundled as a WASI 0.3 component"
+    }
+  ]
+}

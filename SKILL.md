@@ -12,7 +12,7 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 ### 1. 機械チェック(スクリプト)
 
 ```bash
-~/.claude/skills/onomly/onomly <name> [name2 ...]
+${CLAUDE_SKILL_DIR}/onomly <name> [name2 ...]
 ```
 
 launcher が最良エンジンを自動検出する: native almide(whois 込みフル判定)→ 同封 WASI 0.3 コンポーネント on wasmtime(http-only)→ bash 直列。`ONOMLY_ENGINE=almide|wasm|bash` で強制できる。
