@@ -87,12 +87,12 @@ chmod +x onomly
 
 機械チェック部は [Almide](https://github.com/almide/almide) 製(`onomly.almd`)。
 名前 × 11 プローブ(レジストリ 6 + ドメイン 5)を `fan.settle` で一斉並列にし、
-v0.61.0 の `http.request_status` でステータスコードを直接判定する(404 = 空き、200 = 使用中)。
+v0.69.0 の `http.send` でステータスコードを直接判定する(404 = 空き、200 = 使用中)。
 almide が無い環境では、同封の `onomly.wasm`(同じエンジンを WASI 0.3 コンポーネントにコンパイルしたもの。http-only で `.io` / `.ai` は手動確認)を wasmtime の native async で実行。リリースには同じソースからビルドしたネイティブ単一バイナリも添付。シェルスクリプトは一切無い。
 
 ## Requirements
 
-優先順にいずれか: [`almide`](https://github.com/almide/almide/releases) >= 0.61.0 + `whois`(フル判定)/ [`wasmtime`](https://wasmtime.dev) >= 46(同封 WASI 0.3 コンポーネント、http-only)/ 何も無くても [releases](https://github.com/O6lvl4/onomly/releases) のネイティブバイナリで動く。
+優先順にいずれか: [`almide`](https://github.com/almide/almide/releases) >= 0.69.0 + `whois`(フル判定)/ [`wasmtime`](https://wasmtime.dev) >= 46(同封 WASI 0.3 コンポーネント、http-only)/ 何も無くても [releases](https://github.com/O6lvl4/onomly/releases) のネイティブバイナリで動く。
 
 ## Caveats
 
