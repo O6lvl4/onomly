@@ -15,7 +15,7 @@ jobs:
 
       - name: Install almide (latest release)
         run: |
-          curl -sL https://github.com/almide/almide/releases/latest/download/almide-linux-x86_64.tar.gz | tar xz
+          curl -sL https://github.com/almide/almide/releases/download/v0.69.0/almide-linux-x86_64.tar.gz | tar xz
           sudo install -m 755 almide-linux-x86_64/almide /usr/local/bin/almide
           almide --version
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Install almide (latest release)
         run: |
-          curl -sL "https://github.com/almide/almide/releases/latest/download/${{ matrix.almide_asset }}.tar.gz" | tar xz
+          curl -sL "https://github.com/almide/almide/releases/download/v0.69.0/${{ matrix.almide_asset }}.tar.gz" | tar xz
           sudo install -m 755 "${{ matrix.almide_asset }}/almide" /usr/local/bin/almide
           almide --version
           rustc --version
