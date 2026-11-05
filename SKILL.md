@@ -13,7 +13,7 @@ description: プロダクト名候補のデューデリジェンス調査。名�
 
 エンジンを上から順に検出し、最初に使えるもので実行する:
 
-**(a) `almide` >= 0.61.0 がある**(最速・whois 込みのフル判定):
+**(a) `almide` >= 0.69.0 がある**(最速・whois 込みのフル判定):
 
 ```bash
 almide run ${CLAUDE_SKILL_DIR}/onomly.almd -- <name> [name2 ...]

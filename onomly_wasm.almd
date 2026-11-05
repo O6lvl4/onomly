@@ -29,7 +29,7 @@ fn rdap_verdict(code: Int) -> String = match code {
 }
 
 effect fn status_of(url: String) -> Int = {
-  let r = http.request_status("GET", url, "", ["User-Agent": "onomly-skill"])
+  let r = http.send(http.new_request("GET", url, "", [("User-Agent", "onomly-skill")])) |> result.map((resp) => (http.status(resp), http.body(resp)))
   match r {
     ok((code, _)) => code,
     err(_) => 0,
@@ -46,13 +46,13 @@ fn pad(label: String) -> String =
 // it): counts same-name word marks. A SCREEN, not clearance — no Nice-class
 // or similarity judgement; the report still advises a formal search on risk.
 fn tm_verdict(j: Value, name: String) -> String = {
-  let total = json.get_int(j, "totalResults") ?? -1
+  let total = value.get_int(j, "totalResults") ?? -1
   if total < 0 then "unknown (no count in response)"
   else if total == 0 then "clear — 0 marks in JP/US/EU"
   else {
-    let marks = json.get_array(j, "tradeMarks") ?? []
+    let marks = value.get_array(j, "tradeMarks") ?? []
     let exact = marks
-      |> list.filter((t) => string.to_lower(json.get_string(t, "tmName") ?? "") == name)
+      |> list.filter((t) => string.to_lower(value.get_string(t, "tmName") ?? "") == name)
       |> list.len
     if exact > 0 then "IDENTICAL mark exists — ${int.to_string(total)} hits, attorney advised"
     else "no identical mark — ${int.to_string(total)} similar hits (screen only)"
@@ -64,7 +64,7 @@ effect fn tm_screen(name: String) -> String = {
   then "skipped (name has JSON-unsafe chars)"
   else {
     let body = "{\"page\":\"1\",\"pageSize\":\"30\",\"criteria\":\"C\",\"basicSearch\":\"${name}\",\"fOffices\":[\"JP\",\"US\",\"EM\"]}"
-    let r = http.request_status("POST", "https://www.tmdn.org/tmview/api/search/results", body, ["User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Content-Type": "application/json"])
+    let r = http.send(http.new_request("POST", "https://www.tmdn.org/tmview/api/search/results", body, [("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"), ("Content-Type", "application/json")])) |> result.map((resp) => (http.status(resp), http.body(resp)))
     match r {
       ok((code, text)) =>
         if code == 200 then match json.parse(text) {

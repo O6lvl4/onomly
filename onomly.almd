@@ -1,7 +1,7 @@
 // onomly check engine — package registries, GitHub username, domains.
 // Almide port of onomly.sh: EVERY probe of EVERY name runs in one parallel
 // fan.settle, so a full report costs one slowest probe, not a serial walk.
-// Requires almide >= 0.61.0 (http.request_status keeps the status code:
+// Requires almide >= 0.69.0 (http.send keeps the status code of any response:
 // 404 = nobody owns the name, 200 = taken).
 //
 // Domains: authoritative RDAP where a live endpoint exists (.com Verisign,
@@ -13,6 +13,7 @@
 import http
 import json
 import process
+import env
 
 fn verdict(code: Int) -> String = match code {
   404 => "AVAILABLE",
@@ -23,7 +24,7 @@ fn verdict(code: Int) -> String = match code {
 
 // Status of a GET, transport failure collapsed to 0.
 effect fn status_of(url: String) -> Int = {
-  let r = http.request_status("GET", url, "", ["User-Agent": "onomly-skill"])
+  let r = http.send(http.new_request("GET", url, "", [("User-Agent", "onomly-skill")])) |> result.map((resp) => (http.status(resp), http.body(resp)))
   match r {
     ok((code, _)) => code,
     err(_) => 0,
@@ -41,7 +42,7 @@ fn classify_whois(out: String) -> String = {
 }
 
 effect fn whois_check(d: String) -> String = {
-  let w = process.exec_status_timeout("whois", [d], 10000)
+  let w = process.output(process.ProcessCommand { cmd: "whois", args: [d], timeout_ms: 10000 })
   match w {
     ok(st) => classify_whois(st.stdout),
     err(_) => "unknown (whois failed)",
@@ -69,13 +70,13 @@ fn pad(label: String) -> String =
 // it): counts same-name word marks. A SCREEN, not clearance — no Nice-class
 // or similarity judgement; the report still advises a formal search on risk.
 fn tm_verdict(j: Value, name: String) -> String = {
-  let total = json.get_int(j, "totalResults") ?? -1
+  let total = value.get_int(j, "totalResults") ?? -1
   if total < 0 then "unknown (no count in response)"
   else if total == 0 then "clear — 0 marks in JP/US/EU"
   else {
-    let marks = json.get_array(j, "tradeMarks") ?? []
+    let marks = value.get_array(j, "tradeMarks") ?? []
     let exact = marks
-      |> list.filter((t) => string.to_lower(json.get_string(t, "tmName") ?? "") == name)
+      |> list.filter((t) => string.to_lower(value.get_string(t, "tmName") ?? "") == name)
       |> list.len
     if exact > 0 then "IDENTICAL mark exists — ${int.to_string(total)} hits, attorney advised"
     else "no identical mark — ${int.to_string(total)} similar hits (screen only)"
@@ -87,7 +88,7 @@ effect fn tm_screen(name: String) -> String = {
   then "skipped (name has JSON-unsafe chars)"
   else {
     let body = "{\"page\":\"1\",\"pageSize\":\"30\",\"criteria\":\"C\",\"basicSearch\":\"${name}\",\"fOffices\":[\"JP\",\"US\",\"EM\"]}"
-    let r = http.request_status("POST", "https://www.tmdn.org/tmview/api/search/results", body, ["User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36", "Content-Type": "application/json"])
+    let r = http.send(http.new_request("POST", "https://www.tmdn.org/tmview/api/search/results", body, [("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"), ("Content-Type", "application/json")])) |> result.map((resp) => (http.status(resp), http.body(resp)))
     match r {
       ok((code, text)) =>
         if code == 200 then match json.parse(text) {
@@ -128,7 +129,7 @@ fn rows(raw: String) -> List[(String, String, String, String)] = {
 }
 
 effect fn main() -> Unit = {
-  let names = list.drop(process.args(), 1)
+  let names = env.args()
   if list.len(names) == 0 then println("usage: onomly <name> [name2 ...]")
   else {
     let all = names |> list.flat_map((n) => rows(n))
